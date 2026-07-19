@@ -1,1 +1,400 @@
 # Kartu-stok-HTML
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buku Mutasi Stok Barang</title>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        input, select, button {
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover { background-color: #0369a1; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+
+        .btn-delete {
+            background-color: var(--danger);
+            padding: 6px 10px;
+            font-size: 12px;
+            width: auto;
+            margin-top: 0;
+        }
+        
+        .btn-delete:hover { background-color: #b91c1c; }
+
+        .label-keterangan {
+            background-color: #f1f5f9;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            border-left: 3px solid var(--primary);
+            display: inline-block;
+            line-height: 1.4;
+        }
+        
+        .tgl-badge { font-size: 13px; color: #1e293b; font-weight: 500; }
+        .waktu-badge { display: block; font-size: 11px; color: #64748b; margin-top: 2px; }
+        .info-teks { font-size: 12px; color: #64748b; margin-bottom: 15px; display: block; }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        .badge.aman { background-color: var(--success); }
+        .badge.kritis { background-color: var(--danger); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sistem Manajemen & Ketersediaan Stok</h1>
+
+    <div class="dashboard-grid">
+        <!-- Dashboard Ketersediaan Stok -->
+        <div class="card">
+            <h3>Ketersediaan Stok Saat Ini</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama Barang</th>
+                        <th>Tersedia</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryBody">
+                    <!-- Data diringkas otomatis di sini -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Form Input Transaksi -->
+        <div class="card">
+            <h3>Catat Aktivitas Barang</h3>
+            <span class="info-teks">* Sistem akan memvalidasi otomatis. Barang tidak bisa dikeluarkan jika stok tidak mencukupi.</span>
+            
+            <form id="transactionForm">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label>Nama Barang</label>
+                        <input type="text" id="namaBarang" placeholder="Contoh: Kertas A4" required>
+                    </div>
+                    <div>
+                        <label>Jumlah</label>
+                        <input type="number" id="jumlah" placeholder="Jml" required min="1">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label>Jenis Aktivitas</label>
+                        <select id="jenis" required>
+                            <option value="in">Barang Masuk (In)</option>
+                            <option value="out">Barang Dipakai (Out)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Keterangan Penggunaan</label>
+                        <input type="text" id="keterangan" placeholder="Contoh: Beli baru / Dipakai rapat" required>
+                    </div>
+                </div>
+                <button type="submit">Simpan Catatan</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabel Riwayat Transaksi -->
+    <div class="card">
+        <h3>Buku Mutasi (Riwayat In / Out)</h3>
+        <table style="display: block; overflow-x: auto; white-space: nowrap;">
+            <thead style="width: 100%; display: table; table-layout: fixed;">
+                <tr>
+                    <th style="width: 12%;">Waktu Masuk</th>
+                    <th style="width: 12%;">Waktu Keluar</th>
+                    <th style="width: 20%;">Nama Barang</th>
+                    <th style="width: 8%;">In</th>
+                    <th style="width: 8%;">Out</th>
+                    <th style="width: 10%;">Sisa Stok</th>
+                    <th style="width: 20%;">Keterangan</th>
+                    <th style="width: 10%;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody" style="display: table; width: 100%; table-layout: fixed;">
+                <!-- Data akan dimuat melalui JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Ambil data dari LocalStorage
+    let transactions = JSON.parse(localStorage.getItem('stockTransactions')) || [];
+
+    const transactionForm = document.getElementById('transactionForm');
+    const tableBody = document.getElementById('tableBody');
+    const summaryBody = document.getElementById('summaryBody');
+
+    function saveData() {
+        localStorage.setItem('stockTransactions', JSON.stringify(transactions));
+        renderAll();
+    }
+
+    // FUNGSI BERPIKIR KRITIS: Menghitung total stok spesifik untuk 1 barang saat ini
+    function checkCurrentAvailableStock(itemName) {
+        let stock = 0;
+        transactions.forEach(trx => {
+            if (trx.namaBarang.toLowerCase() === itemName.toLowerCase()) {
+                if (trx.jenis === 'in') stock += trx.jumlah;
+                if (trx.jenis === 'out') stock -= trx.jumlah;
+            }
+        });
+        return stock;
+    }
+
+    // Menangani form saat disubmit
+    transactionForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const waktuSekarang = new Date().toISOString(); 
+        const namaInput = document.getElementById('namaBarang').value.trim();
+        const namaBarang = namaInput.charAt(0).toUpperCase() + namaInput.slice(1).toLowerCase(); 
+        const jenis = document.getElementById('jenis').value;
+        const jumlah = parseInt(document.getElementById('jumlah').value);
+        const keterangan = document.getElementById('keterangan').value;
+
+        // VALIDASI: Cegah barang keluar jika stok tidak cukup
+        if (jenis === 'out') {
+            const stokTersedia = checkCurrentAvailableStock(namaBarang);
+            if (jumlah > stokTersedia) {
+                alert(`GAGAL! Stok untuk "${namaBarang}" tidak mencukupi.\nAnda mencoba mengeluarkan ${jumlah}, tetapi sisa stok saat ini hanya ${stokTersedia}.`);
+                return; // Hentikan proses simpan
+            }
+        }
+
+        const newTrx = {
+            id: Date.now(), 
+            date: waktuSekarang, 
+            namaBarang: namaBarang,
+            jenis: jenis,
+            jumlah: jumlah,
+            keterangan: keterangan
+        };
+
+        transactions.push(newTrx);
+        saveData();
+        
+        // Reset form, fokuskan kembali ke input nama barang
+        transactionForm.reset();
+        document.getElementById('namaBarang').focus();
+    });
+
+    // Menghapus data riwayat
+    function deleteItem(id) {
+        if(confirm('Hapus catatan ini? Perhitungan sisa stok akan dihitung ulang secara otomatis.')) {
+            transactions = transactions.filter(trx => trx.id !== id);
+            saveData();
+        }
+    }
+
+    // Memformat Tanggal dan Jam
+    function formatDateTime(isoString) {
+        const dateObj = new Date(isoString);
+        const optionsDate = { day: '2-digit', month: 'short', year: 'numeric' };
+        const tglStr = dateObj.toLocaleDateString('id-ID', optionsDate);
+        const optionsTime = { hour: '2-digit', minute: '2-digit' };
+        const waktuStr = dateObj.toLocaleTimeString('id-ID', optionsTime).replace('.', ':'); 
+        return `<span class="tgl-badge">${tglStr}</span><span class="waktu-badge">${waktuStr} WIB</span>`;
+    }
+
+    // Render Ringkasan Ketersediaan Stok Saat Ini (Dashboard Atas)
+    function renderSummary(stockMap) {
+        summaryBody.innerHTML = '';
+        const items = Object.keys(stockMap).sort(); // Urutkan sesuai abjad
+
+        if (items.length === 0) {
+            summaryBody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:#64748b;">Belum ada stok barang.</td></tr>';
+            return;
+        }
+
+        items.forEach(item => {
+            const sisa = stockMap[item];
+            const badgeClass = sisa > 0 ? 'aman' : 'kritis';
+            const sisaText = sisa > 0 ? `${sisa} Unit` : 'Kosong';
+            
+            summaryBody.innerHTML += `
+                <tr>
+                    <td><strong>${item}</strong></td>
+                    <td><span class="badge ${badgeClass}">${sisaText}</span></td>
+                </tr>
+            `;
+        });
+    }
+
+    // Render Tabel Utama dan Kumpulkan Data untuk Dashboard
+    function renderAll() {
+        tableBody.innerHTML = '';
+        let stockMap = {}; // Untuk menyimpan data dashboard atas
+
+        if(transactions.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Belum ada aktivitas barang.</td></tr>';
+            renderSummary(stockMap);
+            return;
+        }
+
+        // Urutkan data riwayat dari terlama ke terbaru
+        transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+        let tableRows = [];
+
+        // Loop untuk menghitung dan mencetak mutasi
+        transactions.forEach(trx => {
+            if (stockMap[trx.namaBarang] === undefined) {
+                stockMap[trx.namaBarang] = 0;
+            }
+
+            let inStr = '-';
+            let outStr = '-';
+            let tglMasuk = '-';
+            let tglKeluar = '-';
+            let formattedDateTime = formatDateTime(trx.date);
+
+            if (trx.jenis === 'in') {
+                stockMap[trx.namaBarang] += trx.jumlah;
+                inStr = `<span style="color: var(--success); font-weight: bold;">+ ${trx.jumlah}</span>`;
+                tglMasuk = formattedDateTime;
+            } else if (trx.jenis === 'out') {
+                stockMap[trx.namaBarang] -= trx.jumlah;
+                outStr = `<span style="color: var(--danger); font-weight: bold;">- ${trx.jumlah}</span>`;
+                tglKeluar = formattedDateTime;
+            }
+
+            let sisaSaatIni = stockMap[trx.namaBarang];
+            
+            const tr = `
+                <tr>
+                    <td>${tglMasuk}</td>
+                    <td>${tglKeluar}</td>
+                    <td><strong>${trx.namaBarang}</strong></td>
+                    <td>${inStr}</td>
+                    <td>${outStr}</td>
+                    <td><strong>${sisaSaatIni}</strong></td>
+                    <td><span class="label-keterangan">${trx.keterangan}</span></td>
+                    <td><button class="btn-delete" onclick="deleteItem(${trx.id})">Hapus</button></td>
+                </tr>
+            `;
+            tableRows.push(tr);
+        });
+
+        // Balik tabel agar data paling baru di atas
+        tableRows.reverse().forEach(rowHtml => {
+            tableBody.insertAdjacentHTML('beforeend', rowHtml);
+        });
+
+        // Panggil render dashboard atas setelah semua data dihitung
+        renderSummary(stockMap);
+    }
+
+    // Jalankan render saat pertama kali dibuka
+    renderAll();
+</script>
+
+</body>
+</html>
